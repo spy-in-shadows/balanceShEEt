@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  name           String
+  email          String   @unique
+  hashedPassword String?
+  createdAt      DateTime @default(now())
+  uploads        Upload[]
+}
+
+model Product {
+  id              String       @id @default(uuid())
+  name            String
+  sku             String?
+  category        String?
+  inventoryOnHand Int          @default(0)
+  cost            Float?
+  price           Float?
+  active          Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  saleRecords     SaleRecord[]
+}
+
+model SaleRecord {
+  id        String   @id @default(uuid())
+  productId String
+  date      DateTime
+  unitsSold Int
+  revenue   Float
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([date])
+}
+
+model Upload {
+  id        String   @id @default(uuid())
+  userId    String?
+  fileName  String
+  rowCount  Int
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+}
